@@ -21,20 +21,55 @@ function validateProp(
     );
   }
 
-  if (! valueValidator(propValue)) {
-    var validationName = valueValidator.name;
-    var message = 'Invalid ' + location + invalidValueBaseMessage +
-        '`, expected to be successfully validated';
-    if (validationName) {
-      message += 'with `' + validationName + '`.';
-    } else {
-      message += 'with supplied validator.';
-    }
+  var validatorCount = valueValidator.length;
+  for (var i = 0; i < validatorCount; i++) {
+    var validatorInfo = valueValidator[i];
+    var validatorPredicate = validatorInfo.validationPredicate;
+    var validatorFailureMessage = validatorInfo.failureMessage;
+    if (! validatorPredicate(propValue)) {
+      var message = 'Invalid ' + location + invalidValueBaseMessage + '`, ';
 
-    return new Error(message);
+      if (validatorFailureMessage) {
+        message += validatorFailureMessage;
+      } else {
+        message += 'expected to be successfully validated';
+        var validationName = validatorPredicate.name;
+        if (validationName) {
+          message += ' with validator [' + i + '] `' + validationName + '`.';
+        } else {
+          message += ' with supplied validator [' + i + '].';
+        }
+      }
+
+      return new Error(message);
+    }
   }
 
   return null;
+}
+
+function unpackValidator(valueValidator) {
+  var valueValidatorType = typeof valueValidator;
+  if (Array.isArray(valueValidator)) {
+    var multiValidators = [];
+    for (var i = 0; i < valueValidator.length; i++) {
+      var wrappedSingleValitor = unpackValidator(valueValidator[i]);
+      multiValidators.push(wrappedSingleValitor[0]);
+    }
+    return multiValidators;
+  } else if (valueValidatorType === 'object') {
+    if (valueValidator.failureMessage && typeof valueValidator.failureMessage !== 'string') {
+      throw new Error('`failureMessage` must type `string`.');
+    }
+    if (valueValidator.validationPredicate && typeof valueValidator.validationPredicate !== 'function') {
+      throw new Error('`validationPredicate` must type `function`.');
+    }
+    return [ valueValidator ];
+  } else if (valueValidatorType !== 'function') {
+    throw new Error('`valueValidator` must type `function`.');
+  } else {
+    return [ { validationPredicate : valueValidator } ];
+  }
 }
 
 function validateAndBuildConstructionArguments(
@@ -49,11 +84,11 @@ function validateAndBuildConstructionArguments(
     var constructionArgument = expectedPrimitiveType;
     constructionObject.expectedPrimitiveType = constructionArgument.expectedPrimitiveType;
     constructionObject.primitiveTypeValidator = constructionArgument.primitiveTypeValidator;
-    constructionObject.valueValidator = constructionArgument.valueValidator;
+    constructionObject.valueValidator = unpackValidator(constructionArgument.valueValidator);
   } else {
     constructionObject.expectedPrimitiveType = expectedPrimitiveType;
     constructionObject.primitiveTypeValidator = primitiveTypeValidator;
-    constructionObject.valueValidator = valueValidator;
+    constructionObject.valueValidator = unpackValidator(valueValidator);
   }
 
   if (typeof constructionObject.expectedPrimitiveType !== 'string') {
@@ -61,9 +96,6 @@ function validateAndBuildConstructionArguments(
   }
   if (typeof constructionObject.primitiveTypeValidator !== 'function') {
     throw new Error('`primitiveTypeValidator` must type `function`.');
-  }
-  if (typeof constructionObject.valueValidator !== 'function') {
-    throw new Error('`valueValidator` must type `function`.');
   }
 
   return constructionObject;
@@ -108,7 +140,7 @@ function createGenericProptypeChecker(
     }
 
     var invalidValueBaseMessage = ': `' + propName + '` of type `' + propType + '` ' +
-      'supplied to `' + componentName;
+      'supplied to `' + componentName + '`';
 
     return validateProp(
       expectedPrimitiveType,
@@ -121,8 +153,16 @@ function createGenericProptypeChecker(
 
   }
 
-  var requiredPropValidator = propValidator.bind(null, false);
-  requiredPropValidator.isRequired = propValidator.bind(null, true);
+  function wrappedPropValidator() {
+    try {
+      return propValidator.apply(null, arguments);
+    } catch (err) {
+      return new Error('Internal failure: ' + err.stack);
+    }
+  }
+
+  var requiredPropValidator = wrappedPropValidator.bind(null, false);
+  requiredPropValidator.isRequired = wrappedPropValidator.bind(null, true);
 
   return requiredPropValidator;
 

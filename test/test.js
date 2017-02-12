@@ -74,6 +74,69 @@ describe('ProptypeTests', () => {
 
     });
 
+    it('should throw on invalid validation predicate', () => {
+
+      expect(() => {
+        genericProptype(
+          'string',
+          function(obj) {
+            return typeof obj === 'string';
+          },
+          {
+            validationPredicate: 'invalid-predicate',
+          }
+        );
+      }).to.throw(Error);
+
+    });
+
+    it('should throw on invalid validation message', () => {
+
+      expect(() => {
+        genericProptype(
+          'string',
+          function(obj) {
+            return typeof obj === 'string';
+          },
+          {
+            validationPredicate: () => true,
+            failureMessage: () => true,
+          }
+        );
+      }).to.throw(Error);
+
+    });
+
+    it('should warn with stack-trace if an error occured when validating', () => {
+      const errorKey = 'lkj-12lk3j-sdfkj';
+      const TestClass = React.createClass({
+        propTypes : {
+          testComplexProp : genericProptype(
+            'object',
+            function(obj) {
+              return typeof obj === 'object';
+            },
+            function validatorThrows(obj) {
+              throw new Error(errorKey);
+            },
+          ),
+        },
+        render() {
+          return null;
+        },
+      });
+      const testProps = { testComplexProp: {} };
+      const snapshot = createComponentSnapshot(TestClass, testProps);
+
+      expect(snapshot).to.be.null;
+      expect(warnings).to.be.an('array', constructWarningsMessage(warnings));
+      expect(warnings.length).to.equal(1, constructWarningsMessage(warnings));
+      expect(warnings[0]).to.not.contain('Invalid prop', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.not.contain('`testComplexProp`', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.not.contain('`validatorThrows`', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain(errorKey, constructWarningsMessage(warnings));
+    });
+
   });
 
   describe('Success', () => {
@@ -273,6 +336,131 @@ describe('ProptypeTests', () => {
       expect(warnings[0]).to.contain('supplied', constructWarningsMessage(warnings));
       expect(warnings[0]).to.not.contain('`isValid`', constructWarningsMessage(warnings));
 
+    });
+
+  });
+
+  describe('Custom Warning', () => {
+
+    it('should have warning with custom message', () => {
+      const failureMessage = 'test-failure-message';
+      const TestClass = React.createClass({
+        propTypes : {
+          testComplexProp : genericProptype(
+            'object',
+            function(obj) {
+              return typeof obj === 'object';
+            },
+            {
+              validationPredicate: function isValid(obj) {
+                return obj && obj.foo === 456;
+              },
+              failureMessage : failureMessage,
+            }
+          ),
+        },
+        render() {
+          return null;
+        },
+      });
+      const testProps = {
+        testComplexProp: {
+          foo: 123,
+        },
+      };
+      const snapshot = createComponentSnapshot(TestClass, testProps);
+
+      expect(snapshot).to.be.null;
+      expect(warnings).to.be.an('array', constructWarningsMessage(warnings));
+      expect(warnings.length).to.equal(1, constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('Invalid prop', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('`testComplexProp`', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain(failureMessage, constructWarningsMessage(warnings));
+      expect(warnings[0]).to.not.contain('`isValid`', constructWarningsMessage(warnings));
+
+    });
+
+  });
+
+  describe('Multiple validators', () => {
+
+    it('should have warning on first without trying second', () => {
+      const TestClass = React.createClass({
+        propTypes : {
+          testComplexProp : genericProptype(
+            'object',
+            function(obj) {
+              return typeof obj === 'object';
+            },
+            [
+              function shouldFail(obj) {
+                return false;
+              },
+              {
+                validationPredicate: function shouldNeverReach(obj) {
+                  throw new Error('Should not throw ever');
+                },
+              },
+            ],
+          ),
+        },
+        render() {
+          return null;
+        },
+      });
+      const testProps = {
+        testComplexProp: {
+          foo: 123,
+        },
+      };
+      const snapshot = createComponentSnapshot(TestClass, testProps);
+
+      expect(snapshot).to.be.null;
+      expect(warnings).to.be.an('array', constructWarningsMessage(warnings));
+      expect(warnings.length).to.equal(1, constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('Invalid prop', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('`testComplexProp`', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('`shouldFail`', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.not.contain('`shouldNeverReach`', constructWarningsMessage(warnings));
+    });
+
+    it('should have warning on second', () => {
+      const TestClass = React.createClass({
+        propTypes : {
+          testComplexProp : genericProptype(
+            'object',
+            function(obj) {
+              return typeof obj === 'object';
+            },
+            [
+              function isValid(obj) {
+                return true;
+              },
+              {
+                validationPredicate: function isValid(obj) {
+                  return false;
+                },
+              },
+            ],
+          ),
+        },
+        render() {
+          return null;
+        },
+      });
+      const testProps = {
+        testComplexProp: {
+          foo: 123,
+        },
+      };
+      const snapshot = createComponentSnapshot(TestClass, testProps);
+
+      expect(snapshot).to.be.null;
+      expect(warnings).to.be.an('array', constructWarningsMessage(warnings));
+      expect(warnings.length).to.equal(1, constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('Invalid prop', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('`testComplexProp`', constructWarningsMessage(warnings));
+      expect(warnings[0]).to.contain('`isValid`', constructWarningsMessage(warnings));
     });
 
   });
