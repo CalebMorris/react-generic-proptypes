@@ -74,21 +74,6 @@ describe('ProptypeTests', () => {
 
     });
 
-    it('should throw on invalid arugment 3', () => {
-      
-      expect(() => {
-        genericProptype(
-          'string',
-          function(obj) {
-            return typeof obj === 'string';
-          },
-          'ComplexType',
-          null
-        );
-      }).to.throw(Error);
-
-    });
-
   });
 
   describe('Success', () => {
@@ -101,7 +86,6 @@ describe('ProptypeTests', () => {
             function(obj) {
               return typeof obj === 'object';
             },
-            'ComplexType',
             function isValid(value) {
               return true;
             }
@@ -126,7 +110,6 @@ describe('ProptypeTests', () => {
         primitiveTypeValidator: function(obj) {
           return typeof obj === 'object';
         },
-        expectedValueType: 'ComplexType',
         valueValidator: function isValid(value) {
           return true;
         }
@@ -154,7 +137,6 @@ describe('ProptypeTests', () => {
         primitiveTypeValidator: function(obj) {
           return typeof obj === 'object';
         },
-        expectedValueType: 'ComplexType',
         valueValidator: function isValid(value) {
           return true;
         }
@@ -188,7 +170,6 @@ describe('ProptypeTests', () => {
             function(obj) {
               return typeof obj === 'string';
             },
-            'ComplexType',
             function isValid(value) {
               return true;
             }
@@ -198,7 +179,6 @@ describe('ProptypeTests', () => {
             function(obj) {
               return typeof obj === 'object';
             },
-            'ComplexType',
             function isValid(value) {
               return true;
             }
@@ -236,7 +216,6 @@ describe('ProptypeTests', () => {
             function(obj) {
               return typeof obj === 'object';
             },
-            'ComplexType',
             function isValid(obj) {
               return obj && obj.foo === 456;
             }
@@ -270,7 +249,6 @@ describe('ProptypeTests', () => {
             function(obj) {
               return typeof obj === 'object';
             },
-            'ComplexType',
             function (obj) {
               return obj && obj.foo === 456;
             }

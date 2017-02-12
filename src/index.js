@@ -40,7 +40,6 @@ function validateProp(
 function validateAndBuildConstructionArguments(
   expectedPrimitiveType,
   primitiveTypeValidator,
-  expectedValueType,
   valueValidator,
 ) {
   var constructionObject = {};
@@ -50,12 +49,10 @@ function validateAndBuildConstructionArguments(
     var constructionArgument = expectedPrimitiveType;
     constructionObject.expectedPrimitiveType = constructionArgument.expectedPrimitiveType;
     constructionObject.primitiveTypeValidator = constructionArgument.primitiveTypeValidator;
-    constructionObject.expectedValueType = constructionArgument.expectedValueType;
     constructionObject.valueValidator = constructionArgument.valueValidator;
   } else {
     constructionObject.expectedPrimitiveType = expectedPrimitiveType;
     constructionObject.primitiveTypeValidator = primitiveTypeValidator;
-    constructionObject.expectedValueType = expectedValueType;
     constructionObject.valueValidator = valueValidator;
   }
 
@@ -64,9 +61,6 @@ function validateAndBuildConstructionArguments(
   }
   if (typeof constructionObject.primitiveTypeValidator !== 'function') {
     throw new Error('`primitiveTypeValidator` must type `function`.');
-  }
-  if (typeof constructionObject.expectedValueType !== 'string') {
-    throw new Error('`expectedValueType` must type `string`.');
   }
   if (typeof constructionObject.valueValidator !== 'function') {
     throw new Error('`valueValidator` must type `function`.');
@@ -78,14 +72,12 @@ function validateAndBuildConstructionArguments(
 function createGenericProptypeChecker(
   expectedPrimitiveType,
   primitiveTypeValidator,
-  expectedValueType,
   valueValidator,
 ) {
   var constructionObject = validateAndBuildConstructionArguments.apply(null, arguments);
 
   expectedPrimitiveType = constructionObject.expectedPrimitiveType;
   primitiveTypeValidator = constructionObject.primitiveTypeValidator;
-  expectedValueType = constructionObject.expectedValueType;
   valueValidator = constructionObject.valueValidator;
 
   function propValidator(
