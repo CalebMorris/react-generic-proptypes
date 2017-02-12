@@ -40,7 +40,7 @@ function validateProp(
 function validateAndBuildConstructionArguments(
   expectedPrimitiveType,
   primitiveTypeValidator,
-  valueValidator,
+  valueValidator
 ) {
   var constructionObject = {};
 
@@ -72,7 +72,7 @@ function validateAndBuildConstructionArguments(
 function createGenericProptypeChecker(
   expectedPrimitiveType,
   primitiveTypeValidator,
-  valueValidator,
+  valueValidator
 ) {
   var constructionObject = validateAndBuildConstructionArguments.apply(null, arguments);
 
@@ -129,5 +129,5 @@ function createGenericProptypeChecker(
 }
 
 module.exports = {
-  genericProptype: createGenericProptypeChecker
+  genericProptype: createGenericProptypeChecker,
 };

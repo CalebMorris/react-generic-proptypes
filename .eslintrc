@@ -179,7 +179,7 @@
     "max-depth": [ 2, 2 ],
     "max-len": [ 2, 120 ],
     "max-params": [ 0, 4 ],
-    "max-statements": [ 2, 15 ],
+    "max-statements": [ 1, 16 ],
     "no-bitwise": [ 2 ]
   }
 }

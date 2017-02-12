@@ -41,7 +41,7 @@ describe('ProptypeTests', () => {
   describe('Invalid Arguments', () => {
 
     it('should throw on invalid arugment 0', () => {
-      
+
       expect(() => {
         genericProptype(null);
       }).to.throw(Error);
@@ -53,7 +53,7 @@ describe('ProptypeTests', () => {
     });
 
     it('should throw on invalid arugment 1', () => {
-      
+
       expect(() => {
         genericProptype('string', null);
       }).to.throw(Error);
@@ -61,7 +61,7 @@ describe('ProptypeTests', () => {
     });
 
     it('should throw on invalid arugment 2', () => {
-      
+
       expect(() => {
         genericProptype(
           'string',
@@ -112,7 +112,7 @@ describe('ProptypeTests', () => {
         },
         valueValidator: function isValid(value) {
           return true;
-        }
+        },
       };
       const TestClass = React.createClass({
         propTypes : {
@@ -139,7 +139,7 @@ describe('ProptypeTests', () => {
         },
         valueValidator: function isValid(value) {
           return true;
-        }
+        },
       };
       const TestClass = React.createClass({
         propTypes : {
@@ -172,7 +172,7 @@ describe('ProptypeTests', () => {
             },
             function isValid(value) {
               return true;
-            }
+            },
           ),
           testObject : genericProptype(
             'object',
@@ -181,7 +181,7 @@ describe('ProptypeTests', () => {
             },
             function isValid(value) {
               return true;
-            }
+            },
           ),
         },
         render() {
@@ -219,7 +219,7 @@ describe('ProptypeTests', () => {
             function isValid(obj) {
               return obj && obj.foo === 456;
             }
-          )
+          ),
         },
         render() {
           return null;
@@ -249,10 +249,10 @@ describe('ProptypeTests', () => {
             function(obj) {
               return typeof obj === 'object';
             },
-            function (obj) {
+            function(obj) {
               return obj && obj.foo === 456;
-            }
-          )
+            },
+          ),
         },
         render() {
           return null;
