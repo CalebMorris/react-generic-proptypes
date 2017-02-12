@@ -2,6 +2,8 @@
 
 A React Proptype Validator to check if passed prop is following generic predicates
 
+Allows multiple validation steps with different messages
+
 # Example
 
 ``` jsx
@@ -9,7 +11,7 @@ var genericProptype = require('react-generic-proptypes').genericProptype;
 
 const TestClass = React.createClass({
   propTypes : {
-    testComplexProp : genericProptype(
+    testSimpleProp : genericProptype(
       'object',
       function(obj) {
         return typeof obj === 'object';
@@ -18,7 +20,29 @@ const TestClass = React.createClass({
       function (obj) {
         return obj && obj.foo === 456;
       }
-    )
+    ),
+    testComplexProp : genericProptype(
+      'object',
+      function(obj) {
+        return typeof obj === 'object';
+      },
+      [
+        function firstFunction(obj) {
+          return true;
+        },
+        {
+          validationPredicate: function(obj) {
+            return true;
+          },
+        },
+        {
+          failureMessage: 'Custom error message appended to warning',
+          validationPredicate: function shouldNeverReach(obj) {
+            return true;
+          },
+        },
+      ],
+    ),
   },
   render() {
     return null;
@@ -26,7 +50,8 @@ const TestClass = React.createClass({
 });
 
 // Class Use
-<TestClass testComplexProp={{ foo: 456 }} />
+<TestClass testSimpleProp={{ 'test': 1 }}
+           testComplexProp={{ foo: 456 }} />
 
 ```
 
