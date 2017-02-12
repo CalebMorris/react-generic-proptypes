@@ -1,5 +1,7 @@
 # react-generic-proptypes
 
+[![Build Status](https://travis-ci.org/CalebMorris/react-generic-proptypes.svg?branch=master)](https://travis-ci.org/CalebMorris/react-generic-proptypes)
+
 A React Proptype Validator to check if passed prop is following generic predicates
 
 Allows multiple validation steps with different messages
