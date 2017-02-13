@@ -18,7 +18,6 @@ const TestClass = React.createClass({
       function(obj) {
         return typeof obj === 'object';
       },
-      'ComplexType',
       function (obj) {
         return obj && obj.foo === 456;
       }
